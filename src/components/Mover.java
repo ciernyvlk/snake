@@ -1,38 +1,51 @@
 package components;
 
+import java.util.concurrent.atomic.AtomicBoolean;
 import lejos.hardware.motor.Motor;
-import lejos.utility.Delay;
-import interfaces.ManagerListener;
 
-public class Mover implements ManagerListener, Runnable {
-	public Mover() {
+public class Mover implements Runnable {
+
+	private final AtomicBoolean moverMoveStop;
+	private final AtomicBoolean moverTurnAround;
+	private final AtomicBoolean end;
+	Boolean move;
+	
+	public Mover(AtomicBoolean moverMoveStop, AtomicBoolean moverTurnAround, AtomicBoolean end) {
+		this.moverMoveStop = moverMoveStop;
+		this.moverTurnAround = moverTurnAround;
+		this.end = end;
+		move = false;
+
 	    Motor.B.setSpeed(360);
 	    Motor.C.setSpeed(360);
 	}
 
 	public void run() {
-	    Move();		
+		while(true) {
+			listen();
+		}
 	}
 	
-	public void Move() {
-    	Motor.B.forward();
-    	Motor.C.forward();
+	private void listen() {
+		synchronized(moverMoveStop) {
+			try {
+				while(moverMoveStop.get() == false) {
+					moverMoveStop.wait();					
+				}
+				moverMoveStop.compareAndSet(true, false);
+				moverMoveStop.notifyAll();
+				if(move) {
+					move = false;
+			    	Motor.B.stop();
+			    	Motor.C.stop();
+				} else {
+					move = true;
+			    	Motor.B.forward();
+			    	Motor.C.forward();
+				}
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}			
+		}
 	}
-
-	public void TurnAround() {
-    	Motor.B.forward();
-    	Motor.C.backward();	
-    	Delay.msDelay(1000L);
-    	Move();
-	}
-
-	public void Stop() throws InterruptedException {
-    	Motor.B.stop();
-    	Motor.C.stop();
-		Thread.sleep(5000);
-	}
-	
-	public void Open() {}
-	
-	public void Close() {}	
 }

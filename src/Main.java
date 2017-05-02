@@ -2,6 +2,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import components.Arm;
 import components.Manager;
+import components.Mover;
 
 public class Main
 {
@@ -17,16 +18,21 @@ public class Main
   {
 	  //Manager manager = new Manager();
 	  
-	  final AtomicBoolean action = new AtomicBoolean(false);
+	  final AtomicBoolean armOpenClose = new AtomicBoolean(false);
 	  final AtomicBoolean end = new AtomicBoolean(false);
 
+	  final AtomicBoolean moverMoveStop = new AtomicBoolean(false);
+	  final AtomicBoolean moverTurnAround = new AtomicBoolean(false);
+		
 	  //Thread tArm = new Thread(new Arm(), "Arm");
 	  //Thread tManager = new Thread(new Manager(), "Manager");
 	  
-	  Thread tArm = new Thread(new Arm(action, end), "Arm");
-	  Thread tManager = new Thread(new Manager(action, end), "Manager");
+	  Thread tArm = new Thread(new Arm(armOpenClose, end), "Arm");
+	  Thread tMover = new Thread(new Mover(moverMoveStop, moverTurnAround, end), "Mover");
+	  Thread tManager = new Thread(new Manager(armOpenClose, moverMoveStop, moverTurnAround, end), "Manager");
 
 	  tArm.start();
+	  tMover.start();
 	  tManager.start();	  
 	  
 	  Thread.sleep(10000);
