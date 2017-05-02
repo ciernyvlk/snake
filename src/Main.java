@@ -1,17 +1,23 @@
+import components.Arm;
 import components.Manager;
 
 public class Main
 {
-  public static void main(String[] args)
+  public static void main(String[] args) throws InterruptedException
   {
-	  Manager manager = new Manager();
+	  //Manager manager = new Manager();
 	  
-	  try {
-		manager.TestMover();
-	} catch (InterruptedException e) {
-		// TODO Auto-generated catch block
-		e.printStackTrace();
-	}
+	  Boolean open = new Boolean(true);
+
+	  Thread tArm = new Thread(new Arm(open), "Arm");
+	  Thread tManager = new Thread(new Manager(open), "Manager");
+
+	  tArm.start();
+	  tManager.start();	  
+	  
+	  Thread.sleep(10000);
+	  
+	  
   	/*
     Motor.B.setSpeed(360);
     Motor.C.setSpeed(360);

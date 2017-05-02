@@ -2,29 +2,55 @@ package components;
 
 import interfaces.ManagerListener;
 
-public class Manager extends Thread {
+public class Manager extends Thread implements Runnable {
 	//private Integer[] pairedSocks;
 	//private Integer holdSockId;
 	boolean end;
 	Mover mover;
-	Arm arm;
+	//Arm arm;
+	
+	Boolean open;
 	
 	private ManagerListener moverListener;
-	private ManagerListener armListener;
+	//private ManagerListener armListener;
 	
-	public Manager() {
+	public Manager(Boolean open) {
 		//pairedSocks = new Integer[3];
 		//holdSockId = (Integer)null;
-		end = false;
+		//end = false;
 		
-		mover = new Mover();
-		moverListener = mover;
-		(new Thread(mover)).start();
+		//mover = new Mover();
+		//moverListener = mover;
+		//(new Thread(mover)).start();
 		
-		arm = new Arm();
-		armListener = arm;
-		(new Thread(arm)).start();		
+		this.open = open;
+		
+		//arm = new Arm();
+		//armListener = arm;
+		//(new Thread(arm)).start();
+		
 	}
+
+	
+	public void TestArm() throws InterruptedException {
+		synchronized(open) {
+			for(int i = 0; i < 5; i++) {
+				open.notify();
+				open = !open;
+				Thread.sleep(3000);
+			}
+		}
+	}
+	
+	public void run() {
+		try {
+			TestArm();
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
 	
 	private void Move() {
 		moverListener.Move();
@@ -38,14 +64,6 @@ public class Manager extends Thread {
 		moverListener.Stop();
 		mover.wait();
 	}
-
-	private void Open() {
-		armListener.Open();
-	}
-
-	private void Close() {
-		armListener.Open();
-	}
 	
 	public void TestMover() throws InterruptedException {
 		
@@ -56,10 +74,24 @@ public class Manager extends Thread {
 		Thread.sleep(1000);
 		Stop();
 	}
+
+	/*
+	private void Open() {
+		armListener.Open();
+	}
+
+	private void Close() {
+		armListener.Open();
+	}
+	*/
 	
+	/*
 	public void TestArm() {
 		Open();
 		Close();
 	}
+	*/
+	
+	
 
 }
