@@ -1,20 +1,23 @@
 package components;
 
+import java.util.concurrent.atomic.AtomicBoolean;
+
 import interfaces.ManagerListener;
 
 public class Manager extends Thread implements Runnable {
 	//private Integer[] pairedSocks;
 	//private Integer holdSockId;
-	boolean end;
+	//boolean end;
 	Mover mover;
 	//Arm arm;
 	
-	Boolean open;
+	private final AtomicBoolean action;
+	private final AtomicBoolean end;
 	
 	private ManagerListener moverListener;
 	//private ManagerListener armListener;
 	
-	public Manager(Boolean open) {
+	public Manager(AtomicBoolean action, AtomicBoolean end) {
 		//pairedSocks = new Integer[3];
 		//holdSockId = (Integer)null;
 		//end = false;
@@ -23,7 +26,8 @@ public class Manager extends Thread implements Runnable {
 		//moverListener = mover;
 		//(new Thread(mover)).start();
 		
-		this.open = open;
+		this.action = action;
+		this.end = end;
 		
 		//arm = new Arm();
 		//armListener = arm;
@@ -33,22 +37,34 @@ public class Manager extends Thread implements Runnable {
 
 	
 	public void TestArm() throws InterruptedException {
-		synchronized(open) {
-			for(int i = 0; i < 5; i++) {
-				open.notify();
-				open = !open;
-				Thread.sleep(3000);
+		//synchronized(end) {
+			synchronized(action) {
+				for(int i = 0; i < 6; i++) {
+					action.compareAndSet(false, true);
+					//action = true;
+					action.notifyAll();
+					while (action.get() == true) {
+						action.wait();					
+					}
+					Thread.sleep(3000);
+				}
 			}
-		}
+			//end.compareAndSet(false, true);
+			//end.notifyAll();
+		//}
 	}
 	
 	public void run() {
-		try {
-			TestArm();
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		//synchronized(end) {
+			try {
+				TestArm();
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			//end.compareAndSet(false, true);
+			//end.notifyAll();
+		//}
 	}
 	
 	

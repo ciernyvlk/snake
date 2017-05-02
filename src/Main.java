@@ -1,22 +1,36 @@
+import java.util.concurrent.atomic.AtomicBoolean;
+
 import components.Arm;
 import components.Manager;
 
 public class Main
 {
+	/*
+	public static boolean action = false;
+	
+	public boolean getAction() {
+		return action;
+	}
+	*/
+	  
   public static void main(String[] args) throws InterruptedException
   {
 	  //Manager manager = new Manager();
 	  
-	  Boolean open = new Boolean(true);
+	  final AtomicBoolean action = new AtomicBoolean(false);
+	  final AtomicBoolean end = new AtomicBoolean(false);
 
-	  Thread tArm = new Thread(new Arm(open), "Arm");
-	  Thread tManager = new Thread(new Manager(open), "Manager");
+	  //Thread tArm = new Thread(new Arm(), "Arm");
+	  //Thread tManager = new Thread(new Manager(), "Manager");
+	  
+	  Thread tArm = new Thread(new Arm(action, end), "Arm");
+	  Thread tManager = new Thread(new Manager(action, end), "Manager");
 
 	  tArm.start();
 	  tManager.start();	  
 	  
 	  Thread.sleep(10000);
-	  
+	  	  
 	  
   	/*
     Motor.B.setSpeed(360);

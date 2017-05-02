@@ -1,11 +1,15 @@
 package components;
 
+import java.util.concurrent.atomic.AtomicBoolean;
+
 import lejos.hardware.motor.Motor;
 
 //import communication.Chat;
 
 public class Arm implements Runnable {
 	//Chat m;
+	private final AtomicBoolean action;
+	private final AtomicBoolean end;
 	Boolean open;
 	
 	/*
@@ -15,28 +19,35 @@ public class Arm implements Runnable {
 	}
 	*/
 	
-	public Arm(Boolean open) {
-		this.open = open;
+	public Arm(AtomicBoolean action, AtomicBoolean end) {
+		this.action = action;
+		this.end = end;
+		open = true;
 	}
 
 	public void run() {
-		while(true) {
-			listen();
-		}
+		//synchronized(end) {
+			while(end.get() == false) {
+				listen();
+			}
+		//}
 	}
 	
 	private void listen() {
-		synchronized(open) {
+		synchronized(action) {
 			try {
-				open.wait();
+				while(action.get() == false) {
+					action.wait();					
+				}
+				action.compareAndSet(true, false);
+				//action = false;
+				action.notifyAll();
 				if(open) {
-					//open = false;
+					open = false;
 			    	Motor.D.rotate(-135);
-					Thread.sleep(1000);
 				} else {
-					//open = true;
-			    	Motor.D.rotate(135);
-					Thread.sleep(1000);		
+					open = true;
+			    	Motor.D.rotate(135);	
 				}
 			} catch (InterruptedException e) {
 				e.printStackTrace();
