@@ -5,12 +5,10 @@ import lejos.hardware.motor.Motor;
 
 public class Arm implements Runnable {
 	private final AtomicBoolean armOpenClose;
-	private final AtomicBoolean end;
 	Boolean open;
 	
-	public Arm(AtomicBoolean action, AtomicBoolean end) {
-		this.armOpenClose = action;
-		this.end = end;
+	public Arm(AtomicBoolean armOpenClose) {
+		this.armOpenClose = armOpenClose;
 		open = true;
 	}
 

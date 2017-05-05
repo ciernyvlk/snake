@@ -1,83 +1,143 @@
 package components;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-public class Manager extends Thread implements Runnable {
-	//private Integer[] pairedSocks;
-	//private Integer holdSockId;
-	//boolean end;
-	//Mover mover;
-	//Arm arm;
-	
-	private final AtomicBoolean armOpenClose;
-	private final AtomicBoolean end;
+import lejos.hardware.Sound;
 
-	private final AtomicBoolean moverMoveStop;
-	private final AtomicBoolean moverTurnAround;
+import sensors.CameraListener;
+import sensors.InfraredListener;
+
+public class Manager extends Thread implements Runnable, CameraListener, InfraredListener {
+	private List<Integer> pairedSocks;
+	private Integer holdSockId;
 	
-	//private ManagerListener moverListener;
-	//private ManagerListener armListener;
+	private AtomicBoolean armOpenClose;
+	private AtomicBoolean moverMoveStop;
+	private AtomicBoolean moverTurnAround;
 	
-	public Manager(AtomicBoolean armOpenClose, AtomicBoolean moverMoveStop,	AtomicBoolean moverTurnAround, AtomicBoolean end) {
-		//pairedSocks = new Integer[3];
-		//holdSockId = (Integer)null;
-		//end = false;
-		
-		//mover = new Mover();
-		//moverListener = mover;
-		//(new Thread(mover)).start();
+	public Manager(AtomicBoolean armOpenClose, AtomicBoolean moverMoveStop,	AtomicBoolean moverTurnAround) {
+		pairedSocks = new ArrayList<Integer>();
+		holdSockId = (Integer)null;
 		
 		this.armOpenClose = armOpenClose;
-		this.end = end;	
 		this.moverMoveStop = moverMoveStop;
 		this.moverTurnAround = moverTurnAround;
 	}
-
 	
-	public void TestArm() throws InterruptedException {
-		//synchronized(end) {
-			synchronized(armOpenClose) {
-				for(int i = 0; i < 6; i++) {
-					armOpenClose.compareAndSet(false, true);
-					armOpenClose.notifyAll();
-					while (armOpenClose.get() == true) {
-						armOpenClose.wait();					
-					}
-					Thread.sleep(3000);
-				}
-			}
-			//end.compareAndSet(false, true);
-			//end.notifyAll();
-			//while (end.get() == true) {
-				//end.wait();					
-			//}
-		//}
-	}
-	
-	public void TestMover() throws InterruptedException {
-		synchronized(moverMoveStop) {
-			for(int i = 0; i < 6; i++) {
-				moverMoveStop.compareAndSet(false, true);
-				moverMoveStop.notifyAll();
-				while (moverMoveStop.get() == true) {
-					moverMoveStop.wait();
-				}
-				Thread.sleep(3000);
+	public void openCloseArm() throws InterruptedException {
+		synchronized(armOpenClose) {
+			armOpenClose.compareAndSet(false, true);
+			armOpenClose.notifyAll();
+			while (armOpenClose.get() == true) {
+				armOpenClose.wait();					
 			}
 		}
 	}
 	
-	public void run() {
-		//synchronized(end) {
-			try {
-				//TestArm();
-				TestMover();
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+	public void moveStop() throws InterruptedException {
+		synchronized(moverMoveStop) {
+			moverMoveStop.compareAndSet(false, true);
+			moverMoveStop.notifyAll();
+			while (moverMoveStop.get() == true) {
+				moverMoveStop.wait();
 			}
-			//end.compareAndSet(false, true);
-			//end.notifyAll();
-		//}
+		}
+	}
+	
+	public void turnAround() throws InterruptedException {
+		synchronized(moverTurnAround) {
+			moverTurnAround.compareAndSet(false, true);
+			moverTurnAround.notifyAll();
+			while (moverTurnAround.get() == true) {
+				moverTurnAround.wait();
+			}
+		}
+	}
+
+	public void obstacle() throws InterruptedException {
+		moveStop();
+		turnAround();
+		moveStop();	
+	}
+
+	public void black() throws InterruptedException {
+		Sound.twoBeeps();
+		moveStop();
+		turnAround();
+		moveStop();		
+	}
+
+	public void sock(int colorId) throws InterruptedException {
+		if(holdSockId == null) {
+			// If not holding any sock and no such color in the list
+			// pick the sock
+			if(!pairedSocks.contains(colorId)) {
+				moveStop();
+				openCloseArm();
+				moveStop();
+				holdSockId = colorId;
+			}
+		} else {
+			// If holding sock of the same color
+			// leave the sock there and add the color to the list
+			if(holdSockId == colorId) {
+				moveStop();
+				openCloseArm();
+				turnAround();
+				moveStop();
+				pairedSocks.add(colorId);
+				holdSockId = null;
+			}
+		}		
+	}
+	
+	public void TestArm() throws InterruptedException {
+		for(int i = 0; i < 4; i++) {
+			openCloseArm();
+			Thread.sleep(3000);			
+		}
+	}
+	
+	public void TestMover() throws InterruptedException {
+		for(int i = 0; i < 4; i++) {
+			moveStop();
+			Thread.sleep(3000);			
+		}
+	}
+	
+	public void TestTurnAround() throws InterruptedException {
+		for(int i = 0; i < 4; i++) {
+			turnAround();
+			Thread.sleep(3000);			
+		}
+	}
+	
+	public void TestMoveTurnAroundArm() throws InterruptedException {
+		for(int i = 0; i < 4; i++) {
+			for(int j = 0; j < 2; j++) {
+				moveStop();
+				Thread.sleep(2000);					
+			}
+			openCloseArm();
+			turnAround();
+		}
+	}
+	
+	public void run() {
+		try {
+			//moveStop();
+			//Thread.sleep(10000);
+			//moveStop();
+			
+			TestMoveTurnAroundArm();
+			//TestTurnAround();
+			//TestMover();
+			//TestArm();
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 }

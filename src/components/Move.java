@@ -3,17 +3,13 @@ package components;
 import java.util.concurrent.atomic.AtomicBoolean;
 import lejos.hardware.motor.Motor;
 
-public class Mover implements Runnable {
+public class Move implements Runnable {
 
-	private final AtomicBoolean moverMoveStop;
-	private final AtomicBoolean moverTurnAround;
-	private final AtomicBoolean end;
+	private AtomicBoolean moverMoveStop;
 	Boolean move;
 	
-	public Mover(AtomicBoolean moverMoveStop, AtomicBoolean moverTurnAround, AtomicBoolean end) {
+	public Move(AtomicBoolean moverMoveStop) {
 		this.moverMoveStop = moverMoveStop;
-		this.moverTurnAround = moverTurnAround;
-		this.end = end;
 		move = false;
 
 	    Motor.B.setSpeed(360);
