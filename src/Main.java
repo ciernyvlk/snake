@@ -20,14 +20,14 @@ public class Main
 	  Move move = new Move(moverMoveStop);
 	  TurnAround turnAround = new TurnAround(moverTurnAround);  
 	  Arm arm = new Arm(armOpenClose);
-	  //Camera camera = new Camera(manager);
+	  Camera camera = new Camera(manager);
 	  //Infrared infrared = new Infrared(manager);
 	  
 	  (new Thread(arm)).start();
 	  (new Thread(move)).start();
 	  (new Thread(turnAround)).start();
 	  (new Thread(manager)).start();
-	  //(new Thread(camera)).start();
+	  (new Thread(camera)).start();
 	  //(new Thread(infrared)).start();
   }
 }

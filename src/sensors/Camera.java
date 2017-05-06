@@ -27,28 +27,19 @@ public class Camera implements Runnable {
 	public void run() {
 		while (true) {
 			LCD.clear();
-			//Sound.beep();  
 			colorId = colorSensor.getColorID();
 			
-			// debugging info
 			LCD.drawInt(colorId, 2, 2);
-			/*
-			for (int j = 0; j < colorId; j++) {
-		    	Sound.beep();    		
-			}
-			*/
-			
-	    	//Delay.msDelay(1000L);	// set to lower
 	    	
 	    	try {
-		    	if(colorId == blackId) {
-					Sound.twoBeeps(); 
-		    		cameraListener.black();
-			    	//Delay.msDelay(2000L);
-		    	} else {
-		    		cameraListener.sock(colorId);
-			    	//Delay.msDelay(2000L);
-		    	}
+	    		if(colorId != whiteId) {
+			    	if(colorId == blackId) {
+						Sound.twoBeeps(); 
+			    		cameraListener.black();
+			    	} else {
+				    	cameraListener.sock(colorId);
+			    	}	    			
+	    		}
 		    	Thread.sleep(500);
 		    	LCD.refresh();
 	    	} catch (InterruptedException e) {

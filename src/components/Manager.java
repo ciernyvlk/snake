@@ -127,11 +127,9 @@ public class Manager extends Thread implements Runnable, CameraListener, Infrare
 	
 	public void run() {
 		try {
-			//moveStop();
-			//Thread.sleep(10000);
-			//moveStop();
+			moveStop();
 			
-			TestMoveTurnAroundArm();
+			//TestMoveTurnAroundArm();
 			//TestTurnAround();
 			//TestMover();
 			//TestArm();
