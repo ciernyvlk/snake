@@ -7,9 +7,9 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import lejos.hardware.Sound;
 
 import sensors.CameraListener;
-import sensors.InfraredListener;
+import sensors.TouchListener;
 
-public class Manager extends Thread implements Runnable, CameraListener, InfraredListener {
+public class Manager extends Thread implements Runnable, CameraListener, TouchListener {
 	private List<Integer> pairedSocks;
 	private Integer holdSockId;
 	
@@ -27,6 +27,7 @@ public class Manager extends Thread implements Runnable, CameraListener, Infrare
 	}
 	
 	public void openCloseArm() throws InterruptedException {
+		Thread.sleep(500);		// sleep till you get closer to the sock
 		synchronized(armOpenClose) {
 			armOpenClose.compareAndSet(false, true);
 			armOpenClose.notifyAll();

@@ -1,5 +1,5 @@
 package sensors;
 
-public interface InfraredListener {
+public interface TouchListener {
 	void obstacle() throws InterruptedException;
 }
