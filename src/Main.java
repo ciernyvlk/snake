@@ -21,13 +21,13 @@ public class Main
 	  TurnAround turnAround = new TurnAround(moverTurnAround);  
 	  Arm arm = new Arm(armOpenClose);
 	  Camera camera = new Camera(manager);
-	  //Touch touch = new Touch(manager);
+	  Touch touch = new Touch(manager);
 	  
 	  (new Thread(arm)).start();
 	  (new Thread(move)).start();
 	  (new Thread(turnAround)).start();
 	  (new Thread(manager)).start();
 	  (new Thread(camera)).start();
-	  //(new Thread(touch)).start();
+	  (new Thread(touch)).start();
   }
 }
