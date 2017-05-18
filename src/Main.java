@@ -6,6 +6,7 @@ import sensors.Touch;
 import components.Arm;
 import components.Manager;
 import components.Move;
+import components.MoveBackwards;
 import components.TurnAround;
 
 public class Main
@@ -15,10 +16,12 @@ public class Main
 	  final AtomicBoolean armOpenClose = new AtomicBoolean(false);
 	  final AtomicBoolean moverMoveStop = new AtomicBoolean(false);
 	  final AtomicBoolean moverTurnAround = new AtomicBoolean(false);
+	  final AtomicBoolean moverBackwards = new AtomicBoolean(false);
 
-	  Manager manager = new Manager(armOpenClose, moverMoveStop, moverTurnAround);	
+	  Manager manager = new Manager(armOpenClose, moverMoveStop, moverTurnAround, moverBackwards);	
 	  Move move = new Move(moverMoveStop);
 	  TurnAround turnAround = new TurnAround(moverTurnAround);  
+	  MoveBackwards moveBackwards = new MoveBackwards(moverBackwards);  
 	  Arm arm = new Arm(armOpenClose);
 	  Camera camera = new Camera(manager);
 	  Touch touch = new Touch(manager);
@@ -26,6 +29,7 @@ public class Main
 	  (new Thread(arm)).start();
 	  (new Thread(move)).start();
 	  (new Thread(turnAround)).start();
+	  (new Thread(moveBackwards)).start();
 	  (new Thread(manager)).start();
 	  (new Thread(camera)).start();
 	  (new Thread(touch)).start();

@@ -23,7 +23,7 @@ public class Touch implements Runnable {
 	public void run() {
 		while(true) {
 			touch.fetchSample(sample, 0);
-			if(sample[0] == 0) {
+			if(sample[0] != 0) {
 				try {
 					obstacle();
 				} catch (InterruptedException e) {

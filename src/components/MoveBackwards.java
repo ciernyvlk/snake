@@ -1,15 +1,15 @@
 package components;
 
 import java.util.concurrent.atomic.AtomicBoolean;
+
 import lejos.hardware.motor.Motor;
 import lejos.utility.Delay;
 
-public class TurnAround implements Runnable {
-
-	private AtomicBoolean moverTurnAround;
+public class MoveBackwards implements Runnable {
+	private AtomicBoolean moveBackwards;
 	
-	public TurnAround(AtomicBoolean moverTurnAround) {
-		this.moverTurnAround = moverTurnAround;
+	public MoveBackwards(AtomicBoolean moveBackwards) {
+		this.moveBackwards = moveBackwards;
 
 	    Motor.B.setSpeed(360);
 	    Motor.C.setSpeed(360);
@@ -22,15 +22,15 @@ public class TurnAround implements Runnable {
 	}
 	
 	private void listen() {
-		synchronized(moverTurnAround) {
+		synchronized(moveBackwards) {
 			try {
-				while(moverTurnAround.get() == false) {
-					moverTurnAround.wait();					
+				while(moveBackwards.get() == false) {
+					moveBackwards.wait();					
 				}
-				moverTurnAround.compareAndSet(true, false);
-				moverTurnAround.notifyAll();
+				moveBackwards.compareAndSet(true, false);
+				moveBackwards.notifyAll();
 				
-		    	Motor.B.forward();
+		    	Motor.B.backward();
 		    	Motor.C.backward();
 		    	Delay.msDelay(1500L);
 		    	Motor.B.stop();
@@ -40,4 +40,5 @@ public class TurnAround implements Runnable {
 			}			
 		}
 	}
+
 }

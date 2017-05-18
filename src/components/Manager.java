@@ -16,18 +16,19 @@ public class Manager extends Thread implements Runnable, CameraListener, TouchLi
 	private AtomicBoolean armOpenClose;
 	private AtomicBoolean moverMoveStop;
 	private AtomicBoolean moverTurnAround;
+	private AtomicBoolean moveBackwards;
 	
-	public Manager(AtomicBoolean armOpenClose, AtomicBoolean moverMoveStop,	AtomicBoolean moverTurnAround) {
+	public Manager(AtomicBoolean armOpenClose, AtomicBoolean moverMoveStop,	AtomicBoolean moverTurnAround, AtomicBoolean moveBackwards) {
 		pairedSocks = new ArrayList<Integer>();
 		holdSockId = (Integer)null;
 		
 		this.armOpenClose = armOpenClose;
 		this.moverMoveStop = moverMoveStop;
 		this.moverTurnAround = moverTurnAround;
+		this.moveBackwards = moveBackwards;
 	}
 	
 	public void openCloseArm() throws InterruptedException {
-		Thread.sleep(500);		// sleep till you get closer to the sock
 		synchronized(armOpenClose) {
 			armOpenClose.compareAndSet(false, true);
 			armOpenClose.notifyAll();
@@ -56,6 +57,16 @@ public class Manager extends Thread implements Runnable, CameraListener, TouchLi
 			}
 		}
 	}
+	
+	public void moveBackwards() throws InterruptedException {
+		synchronized(moveBackwards) {
+			moveBackwards.compareAndSet(false, true);
+			moveBackwards.notifyAll();
+			while (moveBackwards.get() == true) {
+				moveBackwards.wait();
+			}
+		}
+	}
 
 	public void obstacle() throws InterruptedException {
 		moveStop();
@@ -66,6 +77,7 @@ public class Manager extends Thread implements Runnable, CameraListener, TouchLi
 	public void black() throws InterruptedException {
 		Sound.twoBeeps();
 		moveStop();
+		moveBackwards();
 		turnAround();
 		moveStop();		
 	}
@@ -75,6 +87,7 @@ public class Manager extends Thread implements Runnable, CameraListener, TouchLi
 			// If not holding any sock and no such color in the list
 			// pick the sock
 			if(!pairedSocks.contains(colorId)) {
+				Thread.sleep(500);		// sleep till you get closer to the sock
 				moveStop();
 				openCloseArm();
 				moveStop();
@@ -86,6 +99,7 @@ public class Manager extends Thread implements Runnable, CameraListener, TouchLi
 			if(holdSockId == colorId) {
 				moveStop();
 				openCloseArm();
+				moveBackwards();
 				turnAround();
 				moveStop();
 				pairedSocks.add(colorId);
@@ -94,46 +108,9 @@ public class Manager extends Thread implements Runnable, CameraListener, TouchLi
 		}		
 	}
 	
-	public void TestArm() throws InterruptedException {
-		for(int i = 0; i < 4; i++) {
-			openCloseArm();
-			Thread.sleep(3000);			
-		}
-	}
-	
-	public void TestMover() throws InterruptedException {
-		for(int i = 0; i < 4; i++) {
-			moveStop();
-			Thread.sleep(3000);			
-		}
-	}
-	
-	public void TestTurnAround() throws InterruptedException {
-		for(int i = 0; i < 4; i++) {
-			turnAround();
-			Thread.sleep(3000);			
-		}
-	}
-	
-	public void TestMoveTurnAroundArm() throws InterruptedException {
-		for(int i = 0; i < 4; i++) {
-			for(int j = 0; j < 2; j++) {
-				moveStop();
-				Thread.sleep(2000);					
-			}
-			openCloseArm();
-			turnAround();
-		}
-	}
-	
 	public void run() {
 		try {
 			moveStop();
-			
-			//TestMoveTurnAroundArm();
-			//TestTurnAround();
-			//TestMover();
-			//TestArm();
 		} catch (InterruptedException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
