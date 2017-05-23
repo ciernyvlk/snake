@@ -1,12 +1,11 @@
 package sensors;
 
-import components.Manager;
 
 import lejos.hardware.port.Port;
-import lejos.hardware.Sound;
 import lejos.hardware.ev3.LocalEV3;
 import lejos.hardware.sensor.EV3ColorSensor;
 import lejos.hardware.lcd.LCD;
+import management.Manager;
 
 public class Camera implements Runnable {
 	private Port cameraPort;
@@ -25,25 +24,28 @@ public class Camera implements Runnable {
 	}
 	
 	public void run() {
+		// periodically check the color
 		while (true) {
 			LCD.clear();
-			colorId = colorSensor.getColorID();
+			colorId = colorSensor.getColorID(); // get the color id
 			
+			// print the color id on the LCD
 			LCD.drawInt(colorId, 2, 2);
 	    	
 	    	try {
+	    		// if a color other than white is detected
 	    		if(colorId != whiteId) {
+	    			// if black color is detected generate black() event
 			    	if(colorId == blackId) {
-						Sound.twoBeeps(); 
 			    		cameraListener.black();
 			    	} else {
+			    		// if a sock is detected send sock() event
 				    	cameraListener.sock(colorId);
 			    	}	    			
 	    		}
 		    	Thread.sleep(500);
 		    	LCD.refresh();
 	    	} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 	    	

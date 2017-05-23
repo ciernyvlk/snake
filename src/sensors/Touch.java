@@ -3,7 +3,7 @@ package sensors;
 import lejos.hardware.port.SensorPort;
 import lejos.hardware.sensor.EV3TouchSensor;
 import lejos.hardware.sensor.SensorMode;
-import components.Manager;
+import management.Manager;
 
 public class Touch implements Runnable {
 
@@ -21,19 +21,21 @@ public class Touch implements Runnable {
 	}
 
 	public void run() {
+		// periodically check if the touch sensor is pressed
 		while(true) {
 			touch.fetchSample(sample, 0);
+			// if an obstacle is detected send obstacle() event
 			if(sample[0] != 0) {
 				try {
 					obstacle();
 				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 			}
 		}
 	}
 	
+	// send obstacle() event to the touch listener (manager)
 	private void obstacle() throws InterruptedException {
 		touchListener.obstacle();
 	}

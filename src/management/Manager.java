@@ -1,10 +1,8 @@
-package components;
+package management;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
-
-import lejos.hardware.Sound;
 
 import sensors.CameraListener;
 import sensors.TouchListener;
@@ -19,8 +17,8 @@ public class Manager extends Thread implements Runnable, CameraListener, TouchLi
 	private AtomicBoolean moveBackwards;
 	
 	public Manager(AtomicBoolean armOpenClose, AtomicBoolean moverMoveStop,	AtomicBoolean moverTurnAround, AtomicBoolean moveBackwards) {
-		pairedSocks = new ArrayList<Integer>();
-		holdSockId = (Integer)null;
+		pairedSocks = new ArrayList<Integer>();		// list of colors of the socks that have already been sorted
+		holdSockId = (Integer)null;		// color of the sock currently being held, null if none is being held
 		
 		this.armOpenClose = armOpenClose;
 		this.moverMoveStop = moverMoveStop;
@@ -28,9 +26,11 @@ public class Manager extends Thread implements Runnable, CameraListener, TouchLi
 		this.moveBackwards = moveBackwards;
 	}
 	
+	// open or close the arm
 	public void openCloseArm() throws InterruptedException {
 		synchronized(armOpenClose) {
 			armOpenClose.compareAndSet(false, true);
+			// notify Arm to open or close
 			armOpenClose.notifyAll();
 			while (armOpenClose.get() == true) {
 				armOpenClose.wait();					
@@ -38,9 +38,11 @@ public class Manager extends Thread implements Runnable, CameraListener, TouchLi
 		}
 	}
 	
+	// move or stop the robot
 	public void moveStop() throws InterruptedException {
 		synchronized(moverMoveStop) {
 			moverMoveStop.compareAndSet(false, true);
+			// notify Move to move forward or stop
 			moverMoveStop.notifyAll();
 			while (moverMoveStop.get() == true) {
 				moverMoveStop.wait();
@@ -48,40 +50,45 @@ public class Manager extends Thread implements Runnable, CameraListener, TouchLi
 		}
 	}
 	
+	// turn around
 	public void turnAround() throws InterruptedException {
 		synchronized(moverTurnAround) {
 			moverTurnAround.compareAndSet(false, true);
-			moverTurnAround.notifyAll();
+			moverTurnAround.notifyAll();	// notify TurnAround
 			while (moverTurnAround.get() == true) {
 				moverTurnAround.wait();
 			}
 		}
 	}
 	
+	// move backwards
 	public void moveBackwards() throws InterruptedException {
 		synchronized(moveBackwards) {
 			moveBackwards.compareAndSet(false, true);
-			moveBackwards.notifyAll();
+			moveBackwards.notifyAll();	// notify move backwards
 			while (moveBackwards.get() == true) {
 				moveBackwards.wait();
 			}
 		}
 	}
 
+	// If an obstacle is detected stop, move backwards, turn around and move again
 	public void obstacle() throws InterruptedException {
-		moveStop();
-		turnAround();
-		moveStop();	
-	}
-
-	public void black() throws InterruptedException {
-		Sound.twoBeeps();
 		moveStop();
 		moveBackwards();
 		turnAround();
-		moveStop();		
+		moveStop();
 	}
 
+	// If the black line is detected stop, move backwards, turn around and move again
+	public void black() throws InterruptedException {
+		moveStop();
+		moveBackwards();
+		turnAround();
+		moveStop();
+	}
+
+	// Process the detected sock
 	public void sock(int colorId) throws InterruptedException {
 		if(holdSockId == null) {
 			// If not holding any sock and no such color in the list
@@ -105,14 +112,15 @@ public class Manager extends Thread implements Runnable, CameraListener, TouchLi
 				pairedSocks.add(colorId);
 				holdSockId = null;
 			}
-		}		
+		}
+		// otherwise ignore the sock (socks of such color have already been sorted
+		// or the sock is of different color than the cock currently being held)
 	}
 	
 	public void run() {
 		try {
-			moveStop();
+			moveStop();	// start moving
 		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
